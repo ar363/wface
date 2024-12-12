@@ -76,9 +76,6 @@ onBeforeUnmount(() => {
     clearTimeout(fdt.value)
 })
 
-function parseStrF32(s: string) {
-  return Float32Array.from(s.split(","))
-}
 
 function addNewFace(face: Face) {
   if (videoObj.value && fdt.value) {
