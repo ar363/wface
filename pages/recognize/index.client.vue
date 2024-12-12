@@ -5,15 +5,14 @@ import * as FaceAPI from 'face-api.js'
 const modelsLoaded = ref(false)
 const streamLoaded = ref(false)
 const name = ref("")
-const fdt = ref<NodeJS.Timeout | null>(null)
+const endSignal = ref(false)
 
 interface Face {
   x: number,
   y: number,
   w: number,
   h: number,
-  key: string,
-  desc: Float32Array,
+  match: FaceAPI.FaceMatch,
 }
 
 const recfaces = ref<Face[]>([])
@@ -21,7 +20,7 @@ const videoObj = useTemplateRef("videoObj")
 
 async function loadModels() {
   await FaceAPI.loadTinyFaceDetectorModel('/models')
-  await FaceAPI.loadFaceLandmarkModel('/models')
+  await FaceAPI.loadFaceLandmarkTinyModel('/models')
   await FaceAPI.loadFaceRecognitionModel('/models')
 
   modelsLoaded.value = true
@@ -59,33 +58,34 @@ const savedfaces = JSON.parse(localStorage.getItem("faces") || "[]").map((face: 
 })
 
 async function faceDetection() {
-  fdt.value = setTimeout(() => {
-    faceDetection()
-  }, 300)
 
-  if (!videoObj.value || !modelsLoaded.value) return
 
-  const faces = await FaceAPI.detectAllFaces(videoObj.value, opts).withFaceLandmarks().withFaceDescriptors()
+  if (videoObj.value && modelsLoaded.value) {
+    const faces = await FaceAPI.detectAllFaces(videoObj.value, opts).withFaceLandmarks(true).withFaceDescriptors()
 
-  const matcher = new FaceAPI.FaceMatcher(savedfaces.map((face) => new FaceAPI.LabeledFaceDescriptors(face.name, [face.desc])))
+    const matcher = new FaceAPI.FaceMatcher(savedfaces.map((face) => new FaceAPI.LabeledFaceDescriptors(face.name, [face.desc])))
 
-  recfaces.value = faces.map((face) => {
-    return {
-      x: 100 * face.detection.box.x / face.detection.imageWidth,
-      y: 100 * face.detection.box.y / face.detection.imageHeight,
-      w: 100 * face.detection.box.width / face.detection.imageWidth,
-      h: 100 * face.detection.box.height / face.detection.imageHeight,
-      match: matcher.findBestMatch(face.descriptor),
-    }
-  })
+    recfaces.value = faces.map((face) => {
+      return {
+        x: 100 * face.detection.box.x / face.detection.imageWidth,
+        y: 100 * face.detection.box.y / face.detection.imageHeight,
+        w: 100 * face.detection.box.width / face.detection.imageWidth,
+        h: 100 * face.detection.box.height / face.detection.imageHeight,
+        match: matcher.findBestMatch(face.descriptor),
+      }
+    })
+  }
+
+  if (!endSignal.value)
+    setTimeout(faceDetection, 300)
+
 }
 
 loadModels()
 loadCamera()
 
 onBeforeUnmount(() => {
-  if (fdt.value)
-    clearTimeout(fdt.value)
+  endSignal.value = true
 })
 
 </script>

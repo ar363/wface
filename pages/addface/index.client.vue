@@ -22,7 +22,7 @@ const videoObj = useTemplateRef("videoObj")
 
 async function loadModels() {
   await FaceAPI.loadTinyFaceDetectorModel('/models')
-  await FaceAPI.loadFaceLandmarkModel('/models')
+  await FaceAPI.loadFaceLandmarkTinyModel('/models')
   await FaceAPI.loadFaceRecognitionModel('/models')
 
   modelsLoaded.value = true
@@ -48,24 +48,26 @@ const opts = new FaceAPI.TinyFaceDetectorOptions({
 })
 
 async function faceDetection() {
+
+  if (videoObj.value && modelsLoaded.value) {
+    const faces = await FaceAPI.detectAllFaces(videoObj.value, opts).withFaceLandmarks(true).withFaceDescriptors()
+
+    recfaces.value = faces.map((face) => {
+      return {
+        x: 100 * face.detection.box.x / face.detection.imageWidth,
+        y: 100 * face.detection.box.y / face.detection.imageHeight,
+        w: 100 * face.detection.box.width / face.detection.imageWidth,
+        h: 100 * face.detection.box.height / face.detection.imageHeight,
+        desc: face.descriptor,
+        key: crypto.randomUUID().toString(),
+      }
+    })
+  }
+
+
   fdt.value = setTimeout(() => {
     faceDetection()
   }, 200)
-
-  if (!videoObj.value || !modelsLoaded.value) return
-
-  const faces = await FaceAPI.detectAllFaces(videoObj.value, opts).withFaceLandmarks().withFaceDescriptors()
-
-  recfaces.value = faces.map((face) => {
-    return {
-      x: 100 * face.detection.box.x / face.detection.imageWidth,
-      y: 100 * face.detection.box.y / face.detection.imageHeight,
-      w: 100 * face.detection.box.width / face.detection.imageWidth,
-      h: 100 * face.detection.box.height / face.detection.imageHeight,
-      desc: face.descriptor,
-      key: crypto.randomUUID().toString(),
-    }
-  })
 }
 
 loadModels()
@@ -96,7 +98,7 @@ function saveState() {
     })
 
     localStorage.setItem("faces", JSON.stringify(exfaces))
-    
+
     const router = useRouter()
     router.push("/")
   }
