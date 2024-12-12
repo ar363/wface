@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import * as FaceAPI from 'face-api.js'
 
+
 const modelsLoaded = ref(false)
 const streamLoaded = ref(false)
+const addingFace = ref<Face | null>(null)
+const name = ref("")
 const fdt = ref<NodeJS.Timeout | null>(null)
 
 interface Face {
@@ -10,6 +13,8 @@ interface Face {
   y: number,
   w: number,
   h: number,
+  key: string,
+  desc: Float32Array,
 }
 
 const recfaces = ref<Face[]>([])
@@ -43,22 +48,24 @@ const opts = new FaceAPI.TinyFaceDetectorOptions({
 })
 
 async function faceDetection() {
-  if (!videoObj.value) return
-
-  const faces = await FaceAPI.detectAllFaces(videoObj.value, opts)
-
-  recfaces.value = faces.map((face) => {
-    return {
-      x: 100 * face.box.x / face.imageWidth,
-      y: 100 * face.box.y / face.imageHeight,
-      w: 100 * face.box.width / face.imageWidth,
-      h: 100 * face.box.height / face.imageHeight,
-    }
-  })
-
   fdt.value = setTimeout(() => {
     faceDetection()
   }, 50)
+
+  if (!videoObj.value || !modelsLoaded.value) return
+
+  const faces = await FaceAPI.detectAllFaces(videoObj.value, opts).withFaceLandmarks().withFaceDescriptors()
+
+  recfaces.value = faces.map((face) => {
+    return {
+      x: 100 * face.detection.box.x / face.detection.imageWidth,
+      y: 100 * face.detection.box.y / face.detection.imageHeight,
+      w: 100 * face.detection.box.width / face.detection.imageWidth,
+      h: 100 * face.detection.box.height / face.detection.imageHeight,
+      desc: face.descriptor,
+      key: crypto.randomUUID().toString(),
+    }
+  })
 }
 
 loadModels()
@@ -69,7 +76,34 @@ onBeforeUnmount(() => {
     clearTimeout(fdt.value)
 })
 
+function parseStrF32(s: string) {
+  return Float32Array.from(s.split(","))
+}
 
+function addNewFace(face: Face) {
+  if (videoObj.value && fdt.value) {
+    videoObj.value.pause()
+    clearInterval(fdt.value)
+    addingFace.value = face
+  }
+}
+
+function saveState() {
+  if (name.value) {
+    let exfaces = localStorage.getItem("faces")
+    exfaces = JSON.parse(exfaces || "[]")
+
+    exfaces.push({
+      name: name.value,
+      desc: addingFace.value?.desc.join(","),
+    })
+
+    localStorage.setItem("faces", JSON.stringify(exfaces))
+    
+    const router = useRouter()
+    router.push("/")
+  }
+}
 </script>
 
 <template>
@@ -82,13 +116,27 @@ onBeforeUnmount(() => {
     <div class="mt-4 p-6 rounded-md bg-purple-100 text-purple-800" v-if="!modelsLoaded">Setting up video, please wait...
     </div>
 
+    <div class="flex items-stretch mt-4 mb-3" v-if="addingFace">
+      <input type="text" v-model="name" aria-label="Your name" placeholder="Your name" id="name"
+        class="border border-gray-300 px-3 rounded-l-md" required>
+      <button class="px-4 py-2 bg-blue-500 text-white rounded-r-md" @click="saveState">Save</button>
+    </div>
+
     <div class="relative inline-block">
       <video ref="videoObj" autoplay playsinline @loadedmetadata="faceDetection"></video>
       <div v-for="rf of recfaces"
         :style="{ top: rf.y + '%', left: rf.x + '%', width: rf.w + '%', height: rf.h + '%', position: 'absolute', border: '2px solid white' }"
         class="flex items-end justify-end rounded-t-md rounded-bl-md">
-        <button class="bg-white -mb-8 -mr-[2px] px-4 py-1 rounded-b-md">Add face</button>
+        <button class="bg-white -mb-8 -mr-[2px] px-4 py-1 rounded-b-md" @click="addNewFace(rf)" v-if="!addingFace">Add
+          face</button>
       </div>
+
+      <div v-if="addingFace"
+        :style="{ top: addingFace.y + '%', left: addingFace.x + '%', width: addingFace.w + '%', height: addingFace.h + '%', position: 'absolute', zIndex: 99, border: '2px solid #03fc3d' }"
+        class="flex items-end justify-end rounded-t-md rounded-bl-md">
+        <button class="px-2 rounded-b-md text-[#03fc3d]">Added face!</button>
+      </div>
+
     </div>
   </div>
 </template>
