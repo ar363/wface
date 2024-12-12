@@ -51,14 +51,14 @@ async function faceDetection() {
     return {
       x: 100 * face.box.x / face.imageWidth,
       y: 100 * face.box.y / face.imageHeight,
-      w: face.box.width,
-      h: face.box.height,
+      w: 100 * face.box.width / face.imageWidth,
+      h: 100 * face.box.height / face.imageHeight,
     }
   })
 
   fdt.value = setTimeout(() => {
     faceDetection()
-  }, 100)
+  }, 50)
 }
 
 loadModels()

@@ -51,14 +51,14 @@ async function faceDetection() {
     return {
       x: 100 * face.box.x / face.imageWidth,
       y: 100 * face.box.y / face.imageHeight,
-      w: face.box.width,
-      h: face.box.height,
+      w: 100 * face.box.width / face.imageWidth,
+      h: 100 * face.box.height / face.imageHeight,
     }
   })
 
   fdt.value = setTimeout(() => {
     faceDetection()
-  }, 100)
+  }, 50)
 }
 
 loadModels()
@@ -85,7 +85,8 @@ onBeforeUnmount(() => {
     <div class="relative inline-block">
       <video ref="videoObj" autoplay playsinline @loadedmetadata="faceDetection"></video>
       <div v-for="rf of recfaces"
-        :style="{ top: rf.y + '%', left: rf.x + '%', width: rf.w + 'px', height: rf.h + 'px', position: 'absolute', border: '2px solid white' }" class="flex items-end justify-end rounded-t-md rounded-bl-md">
+        :style="{ top: rf.y + '%', left: rf.x + '%', width: rf.w + '%', height: rf.h + '%', position: 'absolute', border: '2px solid white' }"
+        class="flex items-end justify-end rounded-t-md rounded-bl-md">
         <button class="bg-white -mb-8 -mr-[2px] px-4 py-1 rounded-b-md">Add face</button>
       </div>
     </div>
