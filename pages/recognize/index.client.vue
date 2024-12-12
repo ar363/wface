@@ -61,7 +61,7 @@ const savedfaces = JSON.parse(localStorage.getItem("faces") || "[]").map((face: 
 async function faceDetection() {
   fdt.value = setTimeout(() => {
     faceDetection()
-  }, 100)
+  }, 300)
 
   if (!videoObj.value || !modelsLoaded.value) return
 

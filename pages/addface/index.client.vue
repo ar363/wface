@@ -50,7 +50,7 @@ const opts = new FaceAPI.TinyFaceDetectorOptions({
 async function faceDetection() {
   fdt.value = setTimeout(() => {
     faceDetection()
-  }, 50)
+  }, 200)
 
   if (!videoObj.value || !modelsLoaded.value) return
 
@@ -80,7 +80,7 @@ onBeforeUnmount(() => {
 function addNewFace(face: Face) {
   if (videoObj.value && fdt.value) {
     videoObj.value.pause()
-    clearInterval(fdt.value)
+    clearTimeout(fdt.value)
     addingFace.value = face
   }
 }
