@@ -106,7 +106,7 @@ onBeforeUnmount(() => {
         :style="{ top: rf.y + '%', left: rf.x + '%', width: rf.w + '%', height: rf.h + '%', position: 'absolute', border: '2px solid white' }"
         class="flex items-end justify-end rounded-t-md rounded-bl-md">
         <button class="bg-white -mb-8 -mr-[2px] px-4 py-1 rounded-b-md">{{ rf.match.label }} ({{
-          Math.round(100 * (1 - rf.match.distance), 1) }}%)</button>
+          Math.round(100 * (1 - rf.match.distance)) }}%)</button>
       </div>
     </div>
   </div>
