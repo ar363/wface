@@ -77,7 +77,7 @@ async function faceDetection() {
   }
 
   if (!endSignal.value)
-    setTimeout(faceDetection, 300)
+    requestAnimationFrame(faceDetection)
 
 }
 

@@ -7,6 +7,7 @@ const streamLoaded = ref(false)
 const addingFace = ref<Face | null>(null)
 const name = ref("")
 const fdt = ref<NodeJS.Timeout | null>(null)
+const endSignal = ref(false)
 
 interface Face {
   x: number,
@@ -65,17 +66,15 @@ async function faceDetection() {
   }
 
 
-  fdt.value = setTimeout(() => {
-    faceDetection()
-  }, 200)
+  if(!endSignal)
+    requestAnimationFrame(faceDetection)
 }
 
 loadModels()
 loadCamera()
 
 onBeforeUnmount(() => {
-  if (fdt.value)
-    clearTimeout(fdt.value)
+  endSignal.value = true
 })
 
 
