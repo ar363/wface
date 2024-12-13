@@ -79,9 +79,9 @@ onBeforeUnmount(() => {
 
 
 function addNewFace(face: Face) {
-  if (videoObj.value && fdt.value) {
+  if (videoObj.value) {
     videoObj.value.pause()
-    clearTimeout(fdt.value)
+    endSignal.value = true
     addingFace.value = face
   }
 }
