@@ -41,7 +41,7 @@ async function loadCamera() {
 }
 
 const opts = new FaceAPI.TinyFaceDetectorOptions({
-  inputSize: 512,
+  inputSize: 160,
   scoreThreshold: 0.5,
 })
 
