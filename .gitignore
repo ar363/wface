@@ -1,3 +1,6 @@
+students*.csv
+students*.json
+
 # Nuxt dev/build outputs
 .output
 .data

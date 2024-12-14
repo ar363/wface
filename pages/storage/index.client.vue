@@ -10,7 +10,7 @@ const removeFace = (name) => {
 
 <template>
   <div class="mx-auto p-4 max-w-screen-sm">
-    <h1 class="text-2xl font-bold">Storage</h1>
+    <h1 class="text-2xl font-bold">Storage <NuxtLink href="/storage/add" class="text-blue-500">(Bulk Add)</NuxtLink></h1>
     <ul class="list-disc">
       <li v-for="face in faces" :key="face.name">{{ face.name }} [ <button class="text-red-500" @click="removeFace(face.name)">Remove</button> ]</li>
     </ul>
