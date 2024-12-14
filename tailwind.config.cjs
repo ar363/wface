@@ -20,5 +20,8 @@ export default {
     "/app.config.{js,ts,mjs}",
     "/app/spa-loading-template.html",
   ],
-  plugins: [],
+  plugins: [require("daisyui")],
+  daisyui: {
+    themes: ["light"],
+  },
 };

@@ -8,6 +8,7 @@ const addingFace = ref<Face | null>(null)
 const name = ref("")
 const fdt = ref<NodeJS.Timeout | null>(null)
 const endSignal = ref(false)
+const hideLoader = ref(false)
 
 interface Face {
   x: number,
@@ -22,9 +23,11 @@ const recfaces = ref<Face[]>([])
 const videoObj = useTemplateRef("videoObj")
 
 async function loadModels() {
-  await FaceAPI.loadTinyFaceDetectorModel('/models')
-  await FaceAPI.loadFaceLandmarkTinyModel('/models')
-  await FaceAPI.loadFaceRecognitionModel('/models')
+  await Promise.all([
+    FaceAPI.loadTinyFaceDetectorModel('/models'),
+    FaceAPI.loadFaceLandmarkTinyModel('/models'),
+    FaceAPI.loadFaceRecognitionModel('/models')
+  ])
 
   modelsLoaded.value = true
 }
@@ -51,6 +54,7 @@ const opts = new FaceAPI.TinyFaceDetectorOptions({
 async function faceDetection() {
 
   if (videoObj.value && modelsLoaded.value) {
+    hideLoader.value = true
     const faces = await FaceAPI.detectAllFaces(videoObj.value, opts).withFaceLandmarks(true).withFaceDescriptors()
 
     recfaces.value = faces.map((face) => {
@@ -66,7 +70,7 @@ async function faceDetection() {
   }
 
 
-  if(!endSignal.value)
+  if (!endSignal.value)
     requestAnimationFrame(faceDetection)
 }
 
@@ -135,6 +139,13 @@ function saveState() {
         <button class="px-2 rounded-b-md text-[#03fc3d]">Added face!</button>
       </div>
 
+    </div>
+  </div>
+
+  <div class="z-10 absolute top-0 left-0 w-full h-full flex items-center justify-center bg-opacity-50 bg-blue-500" v-if="!hideLoader">
+    <div class="bg-white p-6 rounded-md shadow">
+      <h1 class="text-xl font-bold mb-4 text-center">Loading models</h1>
+      <progress class="progress w-56"></progress>
     </div>
   </div>
 </template>

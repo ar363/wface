@@ -6,6 +6,7 @@ const modelsLoaded = ref(false)
 const streamLoaded = ref(false)
 const name = ref("")
 const endSignal = ref(false)
+const hideLoader = ref(false)
 
 interface Face {
   x: number,
@@ -19,9 +20,11 @@ const recfaces = ref<Face[]>([])
 const videoObj = useTemplateRef("videoObj")
 
 async function loadModels() {
-  await FaceAPI.loadTinyFaceDetectorModel('/models')
-  await FaceAPI.loadFaceLandmarkTinyModel('/models')
-  await FaceAPI.loadFaceRecognitionModel('/models')
+  await Promise.all([
+    FaceAPI.loadTinyFaceDetectorModel('/models'),
+    FaceAPI.loadFaceLandmarkTinyModel('/models'),
+    FaceAPI.loadFaceRecognitionModel('/models')
+  ])
 
   modelsLoaded.value = true
 }
@@ -61,6 +64,8 @@ async function faceDetection() {
 
 
   if (videoObj.value && modelsLoaded.value) {
+    hideLoader.value = true
+
     const faces = await FaceAPI.detectAllFaces(videoObj.value, opts).withFaceLandmarks(true).withFaceDescriptors()
 
     const matcher = new FaceAPI.FaceMatcher(savedfaces.map((face) => new FaceAPI.LabeledFaceDescriptors(face.name, [face.desc])))
@@ -108,6 +113,13 @@ onBeforeUnmount(() => {
         <button class="bg-white -mb-8 -mr-[2px] px-4 py-1 rounded-b-md">{{ rf.match.label }} ({{
           Math.round(100 * (1 - rf.match.distance)) }}%)</button>
       </div>
+    </div>
+  </div>
+
+  <div class="z-10 absolute top-0 left-0 w-full h-full flex items-center justify-center bg-opacity-50 bg-blue-500" v-if="!hideLoader">
+    <div class="bg-white p-6 rounded-md shadow">
+      <h1 class="text-xl font-bold mb-4 text-center">Loading models</h1>
+      <progress class="progress w-56"></progress>
     </div>
   </div>
 </template>
