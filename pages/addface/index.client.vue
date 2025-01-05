@@ -47,7 +47,7 @@ async function loadCamera() {
 }
 
 const opts = new FaceAPI.TinyFaceDetectorOptions({
-  inputSize: 160,
+  inputSize: 224,
   scoreThreshold: 0.5,
 })
 
@@ -109,43 +109,48 @@ function saveState() {
 </script>
 
 <template>
-  <div class="p-4 mx-auto max-w-screen-xl">
-    <h1 class="text-2xl font-bold">Rec</h1>
+  <div class="bg-emerald-50 min-h-screen">
+    <div class="p-4 mx-auto max-w-screen-xl">
+      <h1 class="text-2xl font-bold mb-4">Add new face</h1>
 
-    <div class="mt-4 p-6 rounded-md bg-amber-100 text-amber-800" v-if="!modelsLoaded">Loading models, please wait...
-    </div>
-
-    <div class="mt-4 p-6 rounded-md bg-purple-100 text-purple-800" v-if="!modelsLoaded">Setting up video, please wait...
-    </div>
-
-    <div class="flex items-stretch mt-4 mb-3" v-if="addingFace">
-      <input type="text" v-model="name" aria-label="Your name" placeholder="Your name" id="name"
-        class="border border-gray-300 px-3 rounded-l-md" required>
-      <button class="px-4 py-2 bg-blue-500 text-white rounded-r-md" @click="saveState">Save</button>
-    </div>
-
-    <div class="relative inline-block">
-      <video ref="videoObj" autoplay playsinline @loadedmetadata="faceDetection"></video>
-      <div v-for="rf of recfaces"
-        :style="{ top: rf.y + '%', left: rf.x + '%', width: rf.w + '%', height: rf.h + '%', position: 'absolute', border: '2px solid white' }"
-        class="flex items-end justify-end rounded-t-md rounded-bl-md">
-        <button class="bg-white -mb-8 -mr-[2px] px-4 py-1 rounded-b-md" @click="addNewFace(rf)" v-if="!addingFace">Add
-          face</button>
+      <div class="mt-4 p-6 rounded-md bg-amber-100 text-amber-800" v-if="!modelsLoaded">Loading models, please wait...
       </div>
 
-      <div v-if="addingFace"
-        :style="{ top: addingFace.y + '%', left: addingFace.x + '%', width: addingFace.w + '%', height: addingFace.h + '%', position: 'absolute', zIndex: 99, border: '2px solid #03fc3d' }"
-        class="flex items-end justify-end rounded-t-md rounded-bl-md">
-        <button class="px-2 rounded-b-md text-[#03fc3d]">Added face!</button>
+      <div class="mt-4 p-6 rounded-md bg-purple-100 text-purple-800" v-if="!modelsLoaded">Setting up video, please
+        wait...
       </div>
 
-    </div>
-  </div>
+      <div class="flex items-stretch mt-4 mb-3" v-if="addingFace">
+        <input type="text" v-model="name" aria-label="Your name" placeholder="Your name" id="name"
+          class="border border-gray-300 px-3 rounded-l-md" required>
+        <button class="px-4 py-2 bg-emerald-700 text-white rounded-r-md" @click="saveState">Save</button>
+      </div>
 
-  <div class="z-10 absolute top-0 left-0 w-full h-full flex items-center justify-center bg-opacity-50 bg-blue-500" v-if="!hideLoader">
-    <div class="bg-white p-6 rounded-md shadow">
-      <h1 class="text-xl font-bold mb-4 text-center">Loading models</h1>
-      <progress class="progress w-56"></progress>
+      <div class="relative inline-block">
+        <video ref="videoObj" autoplay playsinline @loadedmetadata="faceDetection"></video>
+        <div v-for="rf of recfaces"
+          :style="{ top: rf.y + '%', left: rf.x + '%', width: rf.w + '%', height: rf.h + '%', position: 'absolute', border: '2px solid white' }"
+          class="flex items-end justify-end rounded-t-md rounded-bl-md">
+          <button class="bg-emerald-700 text-white -mb-8 -mr-[2px] px-4 py-1 rounded-b-md" @click="addNewFace(rf)"
+            v-if="!addingFace">Add
+            face</button>
+        </div>
+
+        <div v-if="addingFace"
+          :style="{ top: addingFace.y + '%', left: addingFace.x + '%', width: addingFace.w + '%', height: addingFace.h + '%', position: 'absolute', zIndex: 99, border: '2px solid #03fc3d' }"
+          class="flex items-end justify-end rounded-t-md rounded-bl-md">
+          <button class="px-2 rounded-b-md text-[#03fc3d]">Added face!</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="z-10 absolute top-0 left-0 w-full h-full flex items-center justify-center bg-opacity-50 bg-blue-500"
+      v-if="!hideLoader">
+      <div class="bg-white p-6 rounded-md shadow">
+        <h1 class="text-xl font-bold mb-4 text-center">Loading models</h1>
+        <progress class="progress w-56"></progress>
+      </div>
     </div>
   </div>
 </template>

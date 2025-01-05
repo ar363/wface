@@ -23,8 +23,9 @@ function addJSONFile() {
 
 <template>
   <div class="max-w-screen md mx-auto p-4">
-    <h1 class="text-2xl-font-bold">
-      Add faces list (json)
+    <NuxtLink href="/storage" class="text-rose-700 mb-4 block">&larr;  Back</NuxtLink>
+    <h1 class="text-xl font-medium mb-5">
+      Bulk add faces via JSON file
     </h1>
 
     <input class="file-input file-input-bordered" type="file" name="faces" id="faces" @input="addJSONFile">
